@@ -1,0 +1,160 @@
+# 策略参数配置文件
+# 使用YAML格式，便于阅读和修改
+
+# 双均线交叉策略参数
+SMA_Cross:
+  # 策略描述
+  description: "双均线交叉策略"
+  author: "Quant Team"
+  version: "1.0"
+  created_date: "2024-01-01"
+
+  # 基础设置
+  base:
+    timeframe: "daily"           # 时间框架
+    cash: 100000                # 初始资金
+    commission: 0.001           # 佣金
+
+  # 策略参数
+  params:
+    # 均线参数
+    fast_period: 5              # 快线周期
+    slow_period: 20             # 慢线周期
+
+    # 过滤参数
+    use_volume_filter: true     # 是否使用成交量过滤
+    volume_period: 20           # 成交量均线周期
+    volume_multiplier: 1.2      # 成交量倍数阈值
+
+    # 趋势过滤
+    use_trend_filter: false     # 是否使用趋势过滤
+    trend_period: 200           # 趋势判断周期
+
+    # 其他
+    printlog: false             # 是否打印日志
+
+  # 风险管理
+  risk:
+    # 止损止盈
+    stop_loss: 0.05             # 止损比例（5%）
+    trailing_stop: 0.03         # 移动止损比例（3%）
+    take_profit: 0.15           # 止盈比例（15%）
+
+    # 仓位管理
+    position_size: 0.8          # 每次开仓资金比例
+    max_position: 1             # 最大持仓数量
+    pyramiding: 1               # 加仓次数限制
+
+    # 其他风控
+    max_drawdown: 0.20          # 最大允许回撤
+    volatility_stop: false      # 是否启用波动率止损
+
+  # 回测设置
+  backtest:
+    start_date: "2020-01-01"
+    end_date: "2023-12-31"
+    warmup_period: 50           # 预热期（用于指标计算）
+
+  # 优化参数范围
+  optimization:
+    fast_period:
+      min: 3
+      max: 20
+      step: 1
+    slow_period:
+      min: 10
+      max: 60
+      step: 2
+    stop_loss:
+      min: 0.01
+      max: 0.10
+      step: 0.01
+
+# 动量策略参数
+Momentum:
+  description: "动量突破策略"
+  base:
+    timeframe: "daily"
+    cash: 100000
+
+  params:
+    lookback_period: 20         # 动量计算周期
+    holding_period: 10          # 持有周期
+    momentum_threshold: 0.05    # 动量阈值（5%）
+
+    # 过滤器
+    min_price: 5.0              # 最低价格过滤
+    min_volume: 1000000         # 最低成交量
+    rsi_filter: true            # RSI过滤
+    rsi_period: 14
+    rsi_overbought: 70
+    rsi_oversold: 30
+
+  risk:
+    stop_loss: 0.08
+    take_profit: 0.20
+    position_size: 0.6
+
+# 配对交易策略（多标的）
+Pairs_Trading:
+  description: "统计套利配对交易策略"
+  base:
+    timeframe: "daily"
+    cash: 200000                # 需要更多资金
+
+  params:
+    # 配对设置
+    symbol1: "000001.SZ"        # 第一个标的
+    symbol2: "000002.SZ"        # 第二个标的
+
+    # 策略参数
+    lookback: 60                # 回看周期
+    entry_threshold: 2.0        # 入场阈值（标准差倍数）
+    exit_threshold: 0.5         # 出场阈值
+
+    # 风险控制
+    hedge_ratio: 1.0            # 对冲比例
+    max_spread: 0.1             # 最大价差比例
+
+  risk:
+    position_size: 0.4
+    stop_loss: 0.10
+    correlation_threshold: 0.7  # 最低相关系数
+
+# 均值回归策略
+Mean_Reversion:
+  description: "布林带均值回归策略"
+  params:
+    bb_period: 20               # 布林带周期
+    bb_std: 2.0                 # 标准差倍数
+
+    # 过滤条件
+    use_rsi: true
+    rsi_period: 14
+    rsi_overbought: 70
+    rsi_oversold: 30
+
+  risk:
+    stop_loss: 0.04
+    take_profit: 0.08
+    position_size: 0.5
+
+# 海龟交易策略
+Turtle:
+  description: "海龟交易法则"
+  params:
+    # 入场系统
+    entry_period: 20            # 入场突破周期
+    exit_period: 10             # 出场周期
+
+    # 加仓系统
+    add_position_period: 55     # 加仓突破周期
+    pyramiding_levels: 4        # 加仓层数
+
+    # 风险控制
+    atr_period: 20              # ATR周期
+    atr_multiplier: 2.0         # ATR倍数
+
+  risk:
+    unit_size: 0.01             # 单位头寸比例
+    max_units: 4                # 最大单位数
