@@ -11,11 +11,11 @@ import os
 # 添加项目根目录到Python路径
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from stock_trading.config.settings import settings
-from stock_trading.utils.data_loader import data_loader
-from stock_trading.strategies.sma_cross import SMACrossStrategy
-from stock_trading.analyzers.risk_metrics import RiskMetrics
-from stock_trading.utils.plotter import plotter
+from config.settings import settings
+from utils.data_loader import data_loader
+from strategies.sma_cross import SMACrossStrategy
+from analyzers.risk_metrics import RiskMetrics
+from utils.plotter import plotter
 
 
 class PandasDataWithSentiment(bt.feeds.PandasData):

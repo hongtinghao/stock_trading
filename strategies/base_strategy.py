@@ -3,7 +3,7 @@
 所有策略都应该继承这个基类，确保一致的接口和功能
 """
 import backtrader as bt
-from stock_trading.utils.logger import get_logger
+from utils.logger import get_logger
 
 
 class BaseStrategy(bt.Strategy):

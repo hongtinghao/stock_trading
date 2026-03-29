@@ -7,7 +7,7 @@ from typing import Dict, List, Optional
 import json
 from pathlib import Path
 
-from stock_trading.config.settings import settings
+from config.settings import settings
 
 
 @dataclass

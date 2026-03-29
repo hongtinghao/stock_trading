@@ -17,10 +17,10 @@ import akshare as ak
 import baostock as bs
 from tqdm import tqdm  # 进度条
 
-from stock_trading.config.settings import settings
-from stock_trading.config.instruments import instrument_manager
-from stock_trading.utils.logger import get_logger
-from stock_trading.models.factory import ModelFactory
+from config.settings import settings
+from config.instruments import instrument_manager
+from utils.logger import get_logger
+from models.factory import ModelFactory
 
 class DataLoader:
     """数据加载器类"""
@@ -67,7 +67,7 @@ class DataLoader:
         加载价格数据，并自动合并情感分数（如有新闻数据则实时生成）
         """
         # 先尝试读取已处理的情感数据文件
-        processed_file = f"stock_trading/data/processed/{symbol}_with_sentiment.csv"
+        processed_file = f"data/processed/{symbol}_with_sentiment.csv"
         if not force_regenerate and os.path.exists(processed_file):
             # 使用 index_col='date' 直接读取并设置日期索引
             df = pd.read_csv(processed_file, index_col='date', parse_dates=True)
@@ -88,7 +88,7 @@ class DataLoader:
             return price_df
 
         # 加载新闻数据
-        news_path = f"stock_trading/data/raw/news/{symbol}_news.csv"
+        news_path = f"data/raw/news/{symbol}_news.csv"
         news_df = pd.DataFrame()
         if os.path.exists(news_path):
             # 本地文件存在，直接读取

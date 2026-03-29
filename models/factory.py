@@ -1,6 +1,6 @@
-# from stock_trading.models.deepseek_model import DeepSeekModel
-from stock_trading.models.zhipu_model import ZhipuModel
-from stock_trading.config.settings import settings
+# from models.deepseek_model import DeepSeekModel
+from models.zhipu_model import ZhipuModel
+from config.settings import settings
 
 class ModelFactory:
     @staticmethod

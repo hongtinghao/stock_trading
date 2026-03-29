@@ -104,13 +104,13 @@ class Settings:
         'timeout': 10,
         'retries': 5,
         'cache_enabled': True,
-        'cache_path': 'stock_trading/data/processed/model_cache.db'
+        'cache_path': 'data/processed/model_cache.db'
     }
 
     # 新闻数据源配置
     NEWS_SOURCE = {
         'source': 'api',  # 'local' 或 'api'
-        'base_path': 'stock_trading/data/raw/news',
+        'base_path': 'data/raw/news',
         'file_pattern': '{symbol}_news.csv'
     }
 

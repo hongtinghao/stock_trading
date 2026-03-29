@@ -3,7 +3,7 @@
 当短期均线上穿长期均线时买入，下穿时卖出
 """
 import backtrader as bt
-from stock_trading.strategies.base_strategy import BaseStrategy
+from strategies.base_strategy import BaseStrategy
 
 
 class SMACrossStrategy(BaseStrategy):

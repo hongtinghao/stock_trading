@@ -3,7 +3,7 @@ from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 import sys
 
-from stock_trading.config.settings import settings
+from config.settings import settings
 
 def get_logger(name: str, console_level: int = None, file_level: int = None) -> logging.Logger:
     """

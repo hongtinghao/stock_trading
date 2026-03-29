@@ -12,8 +12,8 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
 import seaborn as sns
 
-from stock_trading.config.settings import settings
-from stock_trading.utils.logger import get_logger
+from config.settings import settings
+from utils.logger import get_logger
 
 
 class Plotter:
