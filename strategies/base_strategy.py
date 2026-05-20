@@ -2,9 +2,9 @@
 策略基类
 所有策略都应该继承这个基类，确保一致的接口和功能
 """
+
 import backtrader as bt
 from utils.logger import get_logger
-
 
 class BaseStrategy(bt.Strategy):
     """策略基类"""
@@ -41,13 +41,16 @@ class BaseStrategy(bt.Strategy):
 
         if order.status in [order.Completed]:
             # 订单已完成
+            trade_value = (order.executed.price * abs(order.executed.size))
             if order.isbuy():
                 self.logger.info(f'买入执行, 价格: {order.executed.price:.2f}, '
-                                 f'数量: {order.executed.size}, 成本: {order.executed.value:.2f}, '
+                                 f'数量: {order.executed.size}, '
+                                 f'成本: {trade_value:.2f}, '
                                  f'佣金: {order.executed.comm:.2f}')
             elif order.issell():
                 self.logger.info(f'卖出执行, 价格: {order.executed.price:.2f}, '
-                                 f'数量: {order.executed.size}, 收入: {order.executed.value:.2f}, '
+                                 f'数量: {order.executed.size}, '
+                                 f'成本: {trade_value:.2f}, '
                                  f'佣金: {order.executed.comm:.2f}')
             self.bar_executed = len(self)
             self.trade_count += 1

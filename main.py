@@ -3,7 +3,6 @@
 用于执行单策略回测
 """
 import backtrader as bt
-from datetime import datetime
 import argparse
 import sys
 import os
@@ -12,16 +11,16 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from config.settings import settings
-from utils.data_loader import data_loader
+from data.data_loader import data_loader
 from strategies.sma_cross import SMACrossStrategy
 from analyzers.risk_metrics import RiskMetrics
 from utils.plotter import plotter
 
 
-class PandasDataWithSentiment(bt.feeds.PandasData):
-    """支持 sentiment 列的 PandasData"""
-    lines = ('sentiment',)
-    params = (('sentiment', -1),)
+# class PandasDataWithSentiment(bt.feeds.PandasData):
+#     """支持 sentiment 列的 PandasData"""
+#     lines = ('sentiment',)
+#     params = (('sentiment', -1),)
 
 
 def run_backtest(strategy_class, symbol, start_date, end_date, **kwargs):
@@ -37,18 +36,17 @@ def run_backtest(strategy_class, symbol, start_date, end_date, **kwargs):
     cerebro.broker.setcommission(
         commission=settings.BACKTEST_CONFIG['COMMISSION'],
     )
-
-    # df = load_data(symbol, start_date, end_date)
+    df = data_loader.load_data(symbol, start_date, end_date)
     # 新闻情感
-    df = data_loader.load_data_with_sentiment(symbol, start_date, end_date)
+    # df = data_loader.load_data_with_sentiment(symbol, start_date, end_date)
     if df.empty:
         print(f"无法加载数据: {symbol}")
         return
 
     # 转换为Backtrader数据格式
-    # data = bt.feeds.PandasData(dataname=df)
+    data = bt.feeds.PandasData(dataname=df)
     # 加入 sentiment 新闻情感
-    data = PandasDataWithSentiment(dataname=df)
+    # data = PandasDataWithSentiment(dataname=df)
     cerebro.adddata(data)
 
     # 添加策略
@@ -75,8 +73,12 @@ def run_backtest(strategy_class, symbol, start_date, end_date, **kwargs):
     # 打印分析结果
     print("\n========== 回测结果 ==========")
     print(f"总收益率: {strategy.analyzers.returns.get_analysis()['rtot']:.2%}")
-    print(f"夏普比率: {strategy.analyzers.sharpe.get_analysis()['sharperatio']:.2f}")
-    print(f"最大回撤: {strategy.analyzers.drawdown.get_analysis().max.drawdown:.2%}")
+    sharpe_ratio = strategy.analyzers.sharpe.get_analysis().get('sharperatio', None)
+    if sharpe_ratio is not None:
+        print(f"夏普比率: {sharpe_ratio:.2f}")
+    else:
+        print("夏普比率: 数据不足无法计算")
+    print(f"最大回撤: {strategy.analyzers.drawdown.get_analysis().max.drawdown:.2}%")
 
     # 风险指标
     risk_metrics = strategy.analyzers.risk_metrics.get_analysis()
@@ -97,11 +99,11 @@ def main():
     """主函数"""
     parser = argparse.ArgumentParser(description='运行策略回测')
     parser.add_argument('--strategy', type=str, default='SMACross', help='策略名称 (默认: SMACross)')
-    parser.add_argument('--symbol', type=str, default='600110.SH', help='股票代码 (默认: 600110.SH)')
-    parser.add_argument('--start', type=str, default='2025-02-14', help='开始日期 (默认: 2025-02-5)')
-    parser.add_argument('--end', type=str, default='2026-3-13', help='结束日期 (默认: 2026-3-17)')
-    parser.add_argument('--fast', type=int, default=10, help='快线周期 (默认: 10)')
-    parser.add_argument('--slow', type=int, default=30, help='慢线周期 (默认: 30)')
+    parser.add_argument('--symbol', type=str, default='600110.SH', help='股票代码')
+    parser.add_argument('--start', type=str, default='2025-04-08', help='开始日期')
+    parser.add_argument('--end', type=str, default='2026-04-10', help='结束日期')
+    parser.add_argument('--fast', type=int, default=5, help='快线周期 (默认: 10)')
+    parser.add_argument('--slow', type=int, default=10, help='慢线周期 (默认: 30)')
 
     args = parser.parse_args()
 

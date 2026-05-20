@@ -1,5 +1,5 @@
 import logging
-from logging.handlers import TimedRotatingFileHandler
+from concurrent_log_handler import ConcurrentTimedRotatingFileHandler
 from pathlib import Path
 import sys
 
@@ -42,7 +42,7 @@ def get_logger(name: str, console_level: int = None, file_level: int = None) -> 
     console.setFormatter(console_fmt)
 
     # 按天滚动的文件 handler
-    file_handler = TimedRotatingFileHandler(
+    file_handler = ConcurrentTimedRotatingFileHandler(
         filename=file_path,
         when=settings.LOGGING_CONFIG['WHEN'],
         interval=settings.LOGGING_CONFIG['INTERVAL'],

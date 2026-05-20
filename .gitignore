@@ -9,7 +9,8 @@ venv/
 env/
 
 # 忽略数据文件
-data/
+data/raw/
+data/processed/
 logs/
 results/
 *.csv
@@ -18,3 +19,4 @@ results/
 # 忽略 IDE 配置
 .vscode/
 .idea/
+iFinDPy/

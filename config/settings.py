@@ -2,6 +2,7 @@
 全局参数配置文件
 这里定义了整个项目的全局参数，包括路径、回测参数、数据源配置等
 """
+
 import os
 from pathlib import Path
 from datetime import datetime
@@ -15,8 +16,8 @@ class Settings:
 
     # 数据目录
     DATA_DIR = BASE_DIR / "data"
-    DATA_RAW_DIR = DATA_DIR / "raw"  # 原始数据
-    DATA_PROCESSED_DIR = DATA_DIR / "processed"  # 处理后的数据
+    DATA_RAW_DIR = DATA_DIR / "raw"
+    DATA_PROCESSED_DIR = DATA_DIR / "processed"
 
     # 结果目录
     RESULTS_DIR = BASE_DIR / "results"
@@ -42,35 +43,30 @@ class Settings:
         'STOP_LOSS_ENABLED': True,  # 启用止损
         'TAKE_PROFIT_ENABLED': True,  # 启用止盈
     }
-    '''
-    # 5. 策略配置
-    STRATEGY_CONFIG = {
-        'DEFAULT_TIMEFRAME': 'daily',  # 默认时间框架：daily, weekly, monthly
-        'DEFAULT_LOOKBACK': 252,  # 默认回看周期（交易日）
-        'OPTIMIZATION_METHOD': 'grid',  # 优化方法：grid, random, bayesian
-    }
-    '''
 
-    # 数据源配置
+    # 数据源
     DATA_SOURCES = {
-        'active': 'baostock',  # 当前使用的数据源: 'akshare', 'baostock'
-        'akshare': {
-            'enabled': True,
-            'save_local': True,  # 是否保存到本地
-            'update_interval': 86400,  # 更新间隔（秒）
-            'retry': 3,  # 失败重试次数
-            'timeout': 10,  # 请求超时（秒）
-            'proxy': None,  # 代理地址，如 'http://127.0.0.1:10809'
-        },
-        'baostock': {
-            'enabled': True,
-            'save_local': True,
-            'username': '',
-            'password': '',
-            'retry': 3,
-            'timeout': 10,
-        },
+        'ifind': {
+            'username': os.getenv('IFIND_USER', ''),
+            'password': os.getenv('IFIND_PWD', ''),
+        }
     }
+
+    # 数据库
+    DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://postgres:hth2000002@localhost:5432/Stock')
+
+    # Redis
+    REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
+    REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
+    REDIS_DB = int(os.getenv('REDIS_DB', 0))
+    REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', None)
+
+    # 同花顺实盘
+    THS_EXE_PATH = os.getenv('THS_EXE_PATH', 'C:/Users/v_ynhaohong/Desktop/同花顺/xiadan.exe')
+    THS_ACCOUNT = os.getenv('THS_ACCOUNT', '')
+    THS_PASSWORD = os.getenv('THS_PASSWORD', '')
+    # 佣金费率
+    COMMISSION = 0.0003  # 万3
 
     # 日志配置
     LOGGING_CONFIG = {
