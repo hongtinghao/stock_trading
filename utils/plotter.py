@@ -38,7 +38,7 @@ class Plotter:
 
         self.logger.debug(f"图表绘制器初始化完成，样式: {self.style}")
 
-    def plot_backtrader_results(self, cerebro, strategy_name: str, symbol: str, save: bool = True,
+    def plot_backtrader_results(self, cerebro, strategy_name: str, symbols: list, save: bool = True,
                                 show: bool = False) -> Optional[plt.Figure]:
         """
         绘制Backtrader回测结果
@@ -46,7 +46,7 @@ class Plotter:
         Args:
             cerebro: Backtrader引擎
             strategy_name: 策略名称
-            symbol: 标的代码
+            symbols: 标的代码
             save: 是否保存图表
             show: 是否显示图表
 
@@ -78,8 +78,7 @@ class Plotter:
             matplotlib.use('Agg')
 
             # 绘制回测图表
-            figs = cerebro.plot(style='candlestick', barup='green', bardown='red',
-                                volume=True, figsize=self.figsize)
+            figs = cerebro.plot(style='candlestick', barup='green', bardown='red',  volume=True, figsize=self.figsize)
 
             if not figs:
                 self.logger.warning("没有生成图表")
@@ -87,17 +86,17 @@ class Plotter:
 
             fig = figs[0][0]
             # 添加标题
+            symbol = '_'.join(symbols)
             strategy_title = f"{strategy_name} - {symbol}"
             fig.suptitle(strategy_title, fontsize=16, fontweight='bold')
             # 保存图表
             if save:
-                timestamp = pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')
+                timestamp = pd.Timestamp.now().strftime('%Y%m%d')
                 filename = f"{strategy_name}_{symbol}_{timestamp}.{self.save_format}"
                 filepath = settings.EQUITY_CURVES_DIR / filename
 
                 # 确保目录存在
                 filepath.parent.mkdir(parents=True, exist_ok=True)
-
                 fig.savefig(filepath, dpi=self.dpi, bbox_inches='tight')
                 self.logger.info(f"图表已保存: {filepath}")
 

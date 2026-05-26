@@ -48,6 +48,13 @@ class DataLoader:
         if df.empty:
             self.logger.warning(f"下载为空: {symbol}")
             return df
+        params = ["ths_roe_wgt_publish_stock", ""]
+        df_other = self.ifind.get_date_sequence(symbol, params, start_date, end_date)
+        if not df_other.empty:
+            df_other.rename(columns={
+                'ths_roe_wgt_publish_stock': 'roe'
+            }, inplace=True)
+        df = df.join(df_other)
 
         # 预处理
         df = self._preprocess(df, symbol)
@@ -63,7 +70,22 @@ class DataLoader:
         # 清洗
         df = df[~df.index.duplicated(keep='first')]
         df = df.sort_index()
-        df = df.ffill().dropna()
+        column_mapping = {
+            # 历史数据
+            'preClose': 'pre_close',
+            'avgPrice': 'avg_price',
+            'changeRatio': 'change_ratio',
+            'turnoverRatio': 'turnover_ratio',
+            'transactionAmount': 'transaction_amount',
+            'totalShares': 'total_shares',
+            'totalCapital': 'total_capital',
+            'floatSharesOfAShares': 'float_shares_of_a_shares',
+            'floatCapitalOfAShares': 'float_capital_of_a_shares',
+            'adjustmentFactorBackward1': 'adjustment_factor_backward1',
+            # 时序数据
+            'roe': 'roe',
+        }
+        df.rename(columns=column_mapping, inplace=True)
 
         # 计算指标
         df['returns'] = df['close'].pct_change()

@@ -34,7 +34,6 @@ class TestCycleStrategy(BaseStrategy):
         # 如果有未完成订单，跳过
         if self.order:
             return
-
         if not self.position:
             self.log(f"[TEST] BUY trigger at bar={self.counter}")
             self.order = self.buy(size=self.params.size)

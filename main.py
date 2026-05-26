@@ -11,46 +11,51 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from config.settings import settings
+from config.strategy_config import STRATEGY_CONFIG
 from data.data_loader import data_loader
 from strategies.sma_cross import SMACrossStrategy
+from strategies.multi_factor_strategy import MultiFactorStrategy
 from analyzers.risk_metrics import RiskMetrics
 from utils.plotter import plotter
+from data.complete_data import CompletePandasData
 
-
-# class PandasDataWithSentiment(bt.feeds.PandasData):
-#     """支持 sentiment 列的 PandasData"""
-#     lines = ('sentiment',)
-#     params = (('sentiment', -1),)
-
-
-def run_backtest(strategy_class, symbol, start_date, end_date, **kwargs):
+def run_backtest(strategy_name):
     """运行回测"""
+    # 获取策略配置
+
+    if strategy_name not in STRATEGY_CONFIG:
+        print(f"未知策略: {strategy_name}")
+        print(f"可用策略: {list(STRATEGY_CONFIG.keys())}")
+        return
+    config = STRATEGY_CONFIG[strategy_name]
+    strategy_class = config['class']
+    params = config['params']
+    symbols = config['symbols']
+    start_date = config['start_date']
+    end_date = config['end_date']
+
+
 
     # 创建Cerebro引擎
     cerebro = bt.Cerebro()
-
     # 设置初始资金
     cerebro.broker.setcash(settings.BACKTEST_CONFIG['INITIAL_CASH'])
-
     # 设置佣金
-    cerebro.broker.setcommission(
-        commission=settings.BACKTEST_CONFIG['COMMISSION'],
-    )
-    df = data_loader.load_data(symbol, start_date, end_date)
-    # 新闻情感
-    # df = data_loader.load_data_with_sentiment(symbol, start_date, end_date)
-    if df.empty:
-        print(f"无法加载数据: {symbol}")
+    cerebro.broker.setcommission(commission=settings.BACKTEST_CONFIG['COMMISSION'])
+    data_dict = data_loader.load_multiple(symbols, start_date, end_date)
+    if len(data_dict) == 0:
+        print("无有效数据")
         return
 
-    # 转换为Backtrader数据格式
-    data = bt.feeds.PandasData(dataname=df)
-    # 加入 sentiment 新闻情感
-    # data = PandasDataWithSentiment(dataname=df)
-    cerebro.adddata(data)
+    # 逐个添加数据
+    for sym, df in data_dict.items():
+        # 转换为Backtrader数据格式
+        data = CompletePandasData(dataname=df)
+        # name 用于后续识别
+        cerebro.adddata(data, name=sym)
 
     # 添加策略
-    cerebro.addstrategy(strategy_class, **kwargs)
+    cerebro.addstrategy(strategy_class, **params)
 
     # 添加分析器
     # 夏普比率（Sharpe Ratio）衡量单位风险下的超额收益
@@ -78,7 +83,7 @@ def run_backtest(strategy_class, symbol, start_date, end_date, **kwargs):
         print(f"夏普比率: {sharpe_ratio:.2f}")
     else:
         print("夏普比率: 数据不足无法计算")
-    print(f"最大回撤: {strategy.analyzers.drawdown.get_analysis().max.drawdown:.2}%")
+    print(f"最大回撤: {strategy.analyzers.drawdown.get_analysis().max.drawdown:.2f}%")
 
     # 风险指标
     risk_metrics = strategy.analyzers.risk_metrics.get_analysis()
@@ -89,7 +94,7 @@ def run_backtest(strategy_class, symbol, start_date, end_date, **kwargs):
         print(f"总交易次数: {risk_metrics['总交易次数']}")
 
     # 绘制图表
-    plotter.plot_backtrader_results(cerebro, strategy_class.__name__, symbol, save=True, show=False)
+    plotter.plot_backtrader_results(cerebro, strategy_class.__name__, symbols, save=True, show=False)
     print(f"图表已保存至: {settings.EQUITY_CURVES_DIR}")
 
     return strategy
@@ -97,37 +102,10 @@ def run_backtest(strategy_class, symbol, start_date, end_date, **kwargs):
 
 def main():
     """主函数"""
-    parser = argparse.ArgumentParser(description='运行策略回测')
-    parser.add_argument('--strategy', type=str, default='SMACross', help='策略名称 (默认: SMACross)')
-    parser.add_argument('--symbol', type=str, default='600110.SH', help='股票代码')
-    parser.add_argument('--start', type=str, default='2025-04-08', help='开始日期')
-    parser.add_argument('--end', type=str, default='2026-04-10', help='结束日期')
-    parser.add_argument('--fast', type=int, default=5, help='快线周期 (默认: 10)')
-    parser.add_argument('--slow', type=int, default=10, help='慢线周期 (默认: 30)')
-
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--strategy', type=str, default='MultiFactor', help='策略名称')
     args = parser.parse_args()
-
-    # 策略映射
-    strategies = {
-        'SMACross': SMACrossStrategy,
-    }
-
-    if args.strategy not in strategies:
-        print(f"未知策略: {args.strategy}")
-        print(f"可用策略: {list(strategies.keys())}")
-        return
-
-    strategy_class = strategies[args.strategy]
-
-    # 运行回测
-    run_backtest(
-        strategy_class=strategy_class,
-        symbol=args.symbol,
-        start_date=args.start,
-        end_date=args.end,
-        fast_period=args.fast,
-        slow_period=args.slow
-    )
+    run_backtest(args.strategy)
 
 
 if __name__ == '__main__':

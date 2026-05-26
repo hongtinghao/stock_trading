@@ -56,7 +56,11 @@ class IFindAdapter:
         if not self.connected:
             raise ConnectionError("iFinD未连接")
         ifind_code = self._format_code(symbol)
-        fields = "open,high,low,close,volume,amount"
+        fields = ("open,high,low,close,volume,amount,ps,pcf,ths_trading_status_stock,preClose,avgPrice,change,changeRatio,"
+                  "max_up,max_down,turnoverRatio,transactionAmount,totalShares,totalCapital,"
+                  "floatSharesOfAShares,floatSharesOfBShares,floatCapitalOfAShares,floatCapitalOfBShares,pe_ttm,pe,pb,"
+                  "ths_up_and_down_status_stock,ths_vol_after_trading_stock,ths_trans_num_after_trading_stock,"
+                  "ths_amt_after_trading_stock,ths_vaild_turnover_stock,adjustmentFactorBackward1")
         data = THS_HistoryQuotes(ifind_code, fields, f"period:{period}", start_date, end_date)
         if isinstance(data, dict) and data.get('errorcode') == 0:
             table = data['tables'][0]['table']
